@@ -7,8 +7,9 @@ import android.widget.Button
 import android.widget.TextView
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var messageTextView: TextView;
-    private lateinit var sendButton: Button;
+    private lateinit var messageTextView: TextView
+    private lateinit var sendButton: Button
+    private val cardEmulator: HostCardEmulatorService = HostCardEmulatorService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -20,7 +21,7 @@ class MainActivity : AppCompatActivity() {
 
 
         val oclSendButton = View.OnClickListener {
-            System.err.println(messageTextView.text)
+            cardEmulator.text = messageTextView.text.toString()
         }
 
         sendButton.setOnClickListener(oclSendButton)
