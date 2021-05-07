@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
 
 
         val oclSendButton = View.OnClickListener {
-            cardEmulator.text = messageTextView.text.toString()
+            HostCardEmulatorService.text = messageTextView.text.toString()
         }
 
         sendButton.setOnClickListener(oclSendButton)
