@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.nfc_lib.HostCardEmulatorService
 
 
 class MainActivity : AppCompatActivity() {
@@ -25,7 +26,7 @@ class MainActivity : AppCompatActivity() {
 
 
         val oclSendButton = View.OnClickListener {
-            // work
+//             work
         }
 
         sendButton.setOnClickListener(oclSendButton)
