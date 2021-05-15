@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">nfc control</string>
+    <string name="servicedesc">aaaa</string>
+    <string name="aiddescription">bbbbb</string>
 </resources>
