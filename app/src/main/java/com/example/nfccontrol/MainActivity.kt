@@ -1,6 +1,7 @@
 package com.example.nfccontrol
 
 import android.content.ContentValues.TAG
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -15,8 +16,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sendButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_main)
 
         messageTextView = findViewById(R.id.textMessage)
@@ -28,12 +29,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         sendButton.setOnClickListener(oclSendButton)
-        val intent = intent
-        val data = intent.data
-        val message = data.toString()
 
-        println(message)
+        messageTextView.text = IntentHandler.returnMessage(intent)
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        messageTextView.text = IntentHandler.returnMessage(intent)
+    }
 }
 
