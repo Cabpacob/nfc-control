@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
         messageTextView = findViewById(R.id.textMessage)
 
-        val message = IntentHandler.returnMessage(intent)
+        val message = IntentHandler.extractMessage(intent)
 
         createIntent(message)
     }
@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        val message = IntentHandler.returnMessage(intent)
+        val message = IntentHandler.extractMessage(intent)
 
         createIntent(message)
     }

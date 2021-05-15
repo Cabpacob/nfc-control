@@ -4,7 +4,7 @@ import android.content.Intent
 
 class IntentHandler {
     companion object {
-        fun returnMessage(intent: Intent?): String? {
+        fun extractMessage(intent: Intent?): String? {
             if (intent == null || intent.data == null) {
                 return null
             }
