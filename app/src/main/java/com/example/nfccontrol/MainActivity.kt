@@ -1,14 +1,18 @@
 package com.example.nfccontrol
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.ContentValues.TAG
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var messageTextView: TextView;
-    private lateinit var sendButton: Button;
+    private lateinit var messageTextView: TextView
+    private lateinit var sendButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -20,10 +24,15 @@ class MainActivity : AppCompatActivity() {
 
 
         val oclSendButton = View.OnClickListener {
-            System.err.println(messageTextView.text)
+            // work
         }
 
         sendButton.setOnClickListener(oclSendButton)
+        val intent = intent
+        val data = intent.data
+        val message = data.toString()
+
+        println(message)
     }
 }
 
