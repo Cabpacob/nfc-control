@@ -7,4 +7,16 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="finishedGradientStart">#546e7a</color>
+    <color name="finishedGradientCenter">#62757f</color>
+    <color name="finishedGradientEnd">#718792</color>
+
+    <color name="noDataGradientStart">#4234ff</color>
+    <color name="noDataGradientCenter">#0000ca</color>
+    <color name="noDataGradientEnd">#000097</color>
+
+    <color name="progressGradientStart">#32a011</color>
+    <color name="progressGradientCenter">#007a00</color>
+    <color name="progressGradientEnd">#004c00</color>
 </resources>
