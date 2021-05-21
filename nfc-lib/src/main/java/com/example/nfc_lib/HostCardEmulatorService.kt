@@ -72,6 +72,7 @@ class HostCardEmulatorService : HostApduService() {
         commandApdu: ByteArray?,
         extras: Bundle?
     ): ByteArray {
+        Log.d(TAG, "in process")
         if (commandApdu == null) {
             return Utils.hexStringToByteArray(NFCControlAPI.STATUS_FAILED)
         }

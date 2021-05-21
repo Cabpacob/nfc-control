@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -14,15 +15,16 @@ import com.example.nfc_lib.HostCardEmulatorService
 class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
-    private fun createIntent(message: String?) {
+    private fun submitMessage(message: String?) {
         if (message == null) {
             messageTextView.text = "Please find a QR code"
         } else {
             messageTextView.text = "Hold your phone to smart device"
 
-            val intentToActivity = Intent(this, HostCardEmulatorService::class.java)
-
-            intentToActivity.putExtra(HostCardEmulatorService.KEY_NAME, message)
+            val intentToService = Intent(this, HostCardEmulatorService::class.java)
+            Log.w("Jopa", "kk")
+            intentToService.putExtra(HostCardEmulatorService.KEY_NAME, message)
+            startService(intentToService)
         }
     }
 
@@ -50,9 +52,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         startCurrentAnimation()
-        createIntent(message)
-
-
+        submitMessage(message)
 
 
     }
@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
 
         val message = IntentHandler.extractMessage(intent)
 
-        createIntent(message)
+        submitMessage(message)
     }
 }
 
