@@ -1,16 +1,20 @@
 package com.example.smart_device_example
 
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
+import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.view.View
 import androidx.annotation.ColorInt
+import androidx.appcompat.app.AppCompatActivity
+import com.example.nfc_lib.NfcControlReader
+import org.json.JSONException
+import org.json.JSONObject
 import kotlin.math.abs
 import kotlin.random.Random
-import kotlin.random.nextUInt
 
 class SmartAppActivity : AppCompatActivity() {
     lateinit var container: View
+    lateinit var reader: NfcControlReader
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,6 +23,21 @@ class SmartAppActivity : AppCompatActivity() {
         container.setOnClickListener {
             it.setBackgroundColor(randColor())
         }
+        reader = NfcControlReader(object : NfcControlReader.Callback {
+            override fun onNewData(data: String) {
+                acceptMessage(data)
+            }
+        })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        enableReaderMode()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        disableReaderMode()
     }
 
     @ColorInt
@@ -27,5 +46,28 @@ class SmartAppActivity : AppCompatActivity() {
         val green = abs(Random.nextInt() % 255)
         val blue = abs(Random.nextInt() % 255)
         return Color.rgb(red, green, blue)
+    }
+
+    private fun acceptMessage(message: String) {
+        try {
+            val color = JSONObject(message).getString("color")
+            container.setBackgroundColor(Color.parseColor(color))
+        } catch (e: JSONException) {
+            // Do nothing
+        }
+    }
+
+    private fun enableReaderMode() {
+        val nfc = NfcAdapter.getDefaultAdapter(this)
+        nfc?.enableReaderMode(this, reader, READER_FLAGS, null)
+    }
+
+    private fun disableReaderMode() {
+        val nfc = NfcAdapter.getDefaultAdapter(this)
+        nfc?.disableReaderMode(this)
+    }
+
+    companion object {
+        var READER_FLAGS = NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK
     }
 }

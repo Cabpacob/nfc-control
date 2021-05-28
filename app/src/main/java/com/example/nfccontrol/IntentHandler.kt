@@ -8,7 +8,7 @@ class IntentHandler {
             if (intent == null || intent.data == null) {
                 return null
             }
-            return intent.data.toString()
+            return intent.data?.getQueryParameter("msg") ?: ""
         }
     }
 }

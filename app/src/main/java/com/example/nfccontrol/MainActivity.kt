@@ -6,10 +6,8 @@ import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.nfc_lib.HostCardEmulatorService
 
 
 class MainActivity : AppCompatActivity() {
@@ -21,9 +19,8 @@ class MainActivity : AppCompatActivity() {
         } else {
             messageTextView.text = "Hold your phone to smart device"
 
-            val intentToService = Intent(this, HostCardEmulatorService::class.java)
-            Log.w("Jopa", "kk")
-            intentToService.putExtra(HostCardEmulatorService.KEY_NAME, message)
+            val intentToService = Intent(this, NfcControlAdpuService::class.java)
+            intentToService.putExtra(NfcControlAdpuService.KEY_NAME, message)
             startService(intentToService)
         }
     }
