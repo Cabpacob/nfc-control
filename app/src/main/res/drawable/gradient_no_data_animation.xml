@@ -4,10 +4,10 @@
     <item android:duration="5000"
         android:drawable="@drawable/gradient_no_data_start"/>
 
-    <item android:duration="5000"
-        android:drawable="@drawable/gradient_no_data_center"/>
+<!--    <item android:duration="5000"-->
+<!--        android:drawable="@drawable/gradient_no_data_center"/>-->
 
-    <item android:duration="5000"
-        android:drawable="@drawable/gradient_no_data_end"/>
+<!--    <item android:duration="5000"-->
+<!--        android:drawable="@drawable/gradient_no_data_end"/>-->
 
 </animation-list>
