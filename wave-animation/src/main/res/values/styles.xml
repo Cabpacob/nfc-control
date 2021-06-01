@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <style name="Widget.Progress" parent="@android:style/Widget">
+        <item name="waveStrokeWidth">3dp</item>
+        <item name="waveColor">@color/progressColor</item>
+        <item name="waveGap">100dp</item>
+    </style>
+
+    <style name="Widget.NoData" parent="@android:style/Widget">
+        <item name="waveStrokeWidth">3dp</item>
+        <item name="waveColor">@color/noDataColor</item>
+        <item name="waveGap">100dp</item>
+    </style>
+
+</resources>

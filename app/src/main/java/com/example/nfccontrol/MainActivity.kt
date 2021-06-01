@@ -2,10 +2,11 @@ package com.example.nfccontrol
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.PixelFormat
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.View
+import android.view.Window
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
@@ -43,15 +44,7 @@ class MainActivity : AppCompatActivity() {
 
         val message = IntentHandler.extractMessage(intent)
 
-        if (message == null) {
-            val layout = findViewById<View>(R.id.root_layout)
-            layout.setBackgroundResource(R.drawable.gradient_no_data_animation)
-        }
-
-        startCurrentAnimation()
         submitMessage(message)
-
-
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -61,5 +54,11 @@ class MainActivity : AppCompatActivity() {
 
         submitMessage(message)
     }
+
+//    override fun onAttachedToWindow() {
+//        super.onAttachedToWindow()
+//        val window: Window = window
+//        window.setFormat(PixelFormat.RGBA_8888)
+//    }
 }
 
