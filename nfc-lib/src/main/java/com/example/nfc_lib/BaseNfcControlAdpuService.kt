@@ -5,6 +5,11 @@ import android.os.Bundle
 
 abstract class BaseNfcControlAdpuService : HostApduService() {
     private var message: String? = null
+    private var position = 0
+
+    companion object {
+        private const val messageLength = 200
+    }
 
     fun setMessage(message: String?) {
         this.message = message
@@ -32,7 +37,11 @@ abstract class BaseNfcControlAdpuService : HostApduService() {
         }
 
         val charset = Charsets.UTF_8
-        val textBytes = message?.toByteArray(charset) ?: ByteArray(0)
+        val textBytes =
+            message?.substring(position, position + messageLength)?.toByteArray(charset)
+                ?: ByteArray(0)
+
+        position += messageLength
 
         return if (hexCommandApdu.substring(10, 24) == NFCControlAPI.AID) {
             textBytes + hexStringToByteArray(NFCControlAPI.STATUS_SUCCESS)
