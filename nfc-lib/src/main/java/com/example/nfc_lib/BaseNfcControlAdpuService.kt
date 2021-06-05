@@ -37,9 +37,8 @@ abstract class BaseNfcControlAdpuService : HostApduService() {
         }
 
         val charset = Charsets.UTF_8
-        val textBytes =
-            message?.substring(position, position + messageLength)?.toByteArray(charset)
-                ?: ByteArray(0)
+        val textBytes = message?.substring(position, position + messageLength)?.toByteArray(charset)
+            ?: ByteArray(0)
 
         position += messageLength
 
