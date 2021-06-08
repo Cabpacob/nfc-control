@@ -45,6 +45,16 @@ class MainActivity : AppCompatActivity() {
         startCurrentAnimation()
     }
 
+    private fun getMessage(intent: Intent? = null): String? {
+        val message = IntentHandler.extractMessage(intent)
+        val application = application as StateApplication
+        if (message != null) {
+            application.message = message
+        }
+
+        return application.message
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -52,18 +62,27 @@ class MainActivity : AppCompatActivity() {
 
         messageTextView = findViewById(R.id.textView)
 
-        val message = IntentHandler.extractMessage(intent)
-        updateAnimation(message)
+        val message = getMessage()
 
+        updateAnimation(message)
         submitMessage(message)
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        val message = IntentHandler.extractMessage(intent)
-        updateAnimation(message)
+        val message = getMessage(intent)
 
+        updateAnimation(message)
+        submitMessage(message)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val message = getMessage()
+
+        updateAnimation(message)
         submitMessage(message)
     }
 }
