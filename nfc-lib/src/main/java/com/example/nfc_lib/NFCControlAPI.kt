@@ -2,6 +2,7 @@ package com.example.nfc_lib
 
 object NFCControlAPI {
     const val STATUS_BEGIN = "9999"
+    const val STATUS_END = "1337"
 
     // "OK" status word sent in response to SELECT AID command (0x9000)
     const val STATUS_SUCCESS = "9000"

@@ -14,7 +14,9 @@ abstract class BaseNfcControlAdpuService : HostApduService() {
     }
 
     fun setMessage(message: String?) {
+        position = 0
         sentHeader = false
+        isReady = false
         this.message = message
     }
 
@@ -22,6 +24,10 @@ abstract class BaseNfcControlAdpuService : HostApduService() {
         commandApdu: ByteArray?,
         extras: Bundle?
     ): ByteArray {
+        if (isReady) {
+            return hexStringToByteArray(NFCControlAPI.STATUS_END)
+        }
+
         if (commandApdu == null) {
             return hexStringToByteArray(NFCControlAPI.STATUS_FAILED)
         }
@@ -42,7 +48,10 @@ abstract class BaseNfcControlAdpuService : HostApduService() {
         val charset = Charsets.UTF_8
         val textBytes = if (sentHeader) {
             position += messageLength
-            message?.substring(position - messageLength, position)?.toByteArray(charset)
+            message?.substring(
+                position - messageLength,
+                kotlin.math.min(position, message!!.length)
+            )?.toByteArray(charset)
                 ?: ByteArray(0)
         } else {
             (message ?: "").length.toString().toByteArray(charset)
@@ -50,11 +59,13 @@ abstract class BaseNfcControlAdpuService : HostApduService() {
 
         return if (hexCommandApdu.substring(10, 24) == NFCControlAPI.AID) {
             textBytes + (if (sentHeader) {
+
                 if (message != null && position >= message!!.length) {
                     isReady = true
                 }
                 hexStringToByteArray(NFCControlAPI.STATUS_SUCCESS)
             } else {
+                sentHeader = true
                 hexStringToByteArray(NFCControlAPI.STATUS_BEGIN)
             })
         } else {
