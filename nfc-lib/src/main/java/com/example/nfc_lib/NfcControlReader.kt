@@ -16,6 +16,9 @@ class NfcControlReader(private val callback: Callback) : NfcAdapter.ReaderCallba
      *
      * @param tag Discovered tag
      */
+    private var message: String = ""
+    private var expectedLength = -1
+
     override fun onTagDiscovered(tag: Tag?) {
         Log.i(TAG, "New tag discovered")
         // Android's Host-based Card Emulation (HCE) feature implements the ISO-DEP (ISO 14443-4)
@@ -41,12 +44,24 @@ class NfcControlReader(private val callback: Callback) : NfcAdapter.ReaderCallba
                 val result = isoDep.transceive(selCommand)
                 val statusWord = byteArrayOf(result[result.size - 2], result[result.size - 1])
                 val payload: ByteArray = Arrays.copyOf(result, result.size - 2)
-                if (hexStringToByteArray(NFCControlAPI.STATUS_SUCCESS).contentEquals(statusWord)) {
-                    val resultData = String(payload, Charset.defaultCharset())
-                    callback.onNewData(resultData)
-                    Log.i(TAG, "Received: $resultData")
-                } else {
-                    Log.w(TAG, "Failed to select AID: ${byteArrayToHexString(result)}")
+                when {
+                    hexStringToByteArray(NFCControlAPI.STATUS_BEGIN).contentEquals(statusWord) -> {
+                        val resultData = String(payload, Charset.defaultCharset()).toInt()
+                        expectedLength = resultData
+                        message = ""
+                        Log.i(TAG, "New request on $resultData bytes")
+                    }
+                    hexStringToByteArray(NFCControlAPI.STATUS_SUCCESS).contentEquals(statusWord) -> {
+                        val resultData = String(payload, Charset.defaultCharset())
+                        message += resultData
+                        if (message.length == expectedLength) {
+                            callback.onNewData(resultData)
+                        }
+                        Log.i(TAG, "Received: $resultData")
+                    }
+                    else -> {
+                        Log.w(TAG, "Failed to select AID: ${byteArrayToHexString(result)}")
+                    }
                 }
             } catch (e: IOException) {
                 Log.e(TAG, "Error communicating with card: $e")

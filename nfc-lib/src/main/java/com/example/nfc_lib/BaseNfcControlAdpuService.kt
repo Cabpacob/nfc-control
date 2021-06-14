@@ -6,12 +6,15 @@ import android.os.Bundle
 abstract class BaseNfcControlAdpuService : HostApduService() {
     private var message: String? = null
     private var position = 0
+    private var sentHeader = false
+    private var isReady = false
 
     companion object {
         private const val messageLength = 200
     }
 
     fun setMessage(message: String?) {
+        sentHeader = false
         this.message = message
     }
 
@@ -37,14 +40,23 @@ abstract class BaseNfcControlAdpuService : HostApduService() {
         }
 
         val charset = Charsets.UTF_8
-        val textBytes =
-            message?.substring(position, position + messageLength)?.toByteArray(charset)
+        val textBytes = if (sentHeader) {
+            position += messageLength
+            message?.substring(position - messageLength, position)?.toByteArray(charset)
                 ?: ByteArray(0)
-
-        position += messageLength
+        } else {
+            (message ?: "").length.toString().toByteArray(charset)
+        }
 
         return if (hexCommandApdu.substring(10, 24) == NFCControlAPI.AID) {
-            textBytes + hexStringToByteArray(NFCControlAPI.STATUS_SUCCESS)
+            textBytes + (if (sentHeader) {
+                if (message != null && position >= message!!.length) {
+                    isReady = true
+                }
+                hexStringToByteArray(NFCControlAPI.STATUS_SUCCESS)
+            } else {
+                hexStringToByteArray(NFCControlAPI.STATUS_BEGIN)
+            })
         } else {
             hexStringToByteArray(NFCControlAPI.STATUS_FAILED)
         }
