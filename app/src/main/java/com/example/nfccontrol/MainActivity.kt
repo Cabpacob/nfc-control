@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -34,6 +33,28 @@ class MainActivity : AppCompatActivity() {
         animDrawable.start()
     }
 
+    private fun updateAnimation(message: String?) {
+        val application = application as StateApplication
+        if (message == null) {
+            application.state = State.NO_DATA
+        } else {
+            application.state = State.PROGRESS
+        }
+
+        findViewById<View>(R.id.root_layout).setBackgroundResource(application.state.animation)
+        startCurrentAnimation()
+    }
+
+    private fun getMessage(intent: Intent? = null): String? {
+        val message = IntentHandler.extractMessage(intent)
+        val application = application as StateApplication
+        if (message != null) {
+            application.message = message
+        }
+
+        return application.message
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -41,24 +62,27 @@ class MainActivity : AppCompatActivity() {
 
         messageTextView = findViewById(R.id.textView)
 
-        val message = IntentHandler.extractMessage(intent)
+        val message = getMessage()
 
-        if (message == null) {
-            val layout = findViewById<View>(R.id.root_layout)
-            layout.setBackgroundResource(R.drawable.gradient_no_data_animation)
-        }
-
-        startCurrentAnimation()
+        updateAnimation(message)
         submitMessage(message)
-
-
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        val message = IntentHandler.extractMessage(intent)
+        val message = getMessage(intent)
 
+        updateAnimation(message)
+        submitMessage(message)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val message = getMessage()
+
+        updateAnimation(message)
         submitMessage(message)
     }
 }
