@@ -4,10 +4,9 @@
     <item android:duration="5000"
         android:drawable="@drawable/gradient_progress_start"/>
 
-    <item android:duration="5000"
-        android:drawable="@drawable/gradient_progress_center"/>
+<!--    <item android:duration="5000"-->
+<!--        android:drawable="@drawable/gradient_progress_center"/>-->
 
-    <item android:duration="5000"
-        android:drawable="@drawable/gradient_progress_end"/>
-
+<!--    <item android:duration="5000"-->
+<!--        android:drawable="@drawable/gradient_progress_end"/>-->
 </animation-list>
