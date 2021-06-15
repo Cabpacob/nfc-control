@@ -16,6 +16,9 @@ class NfcControlReader(private val callback: Callback) : NfcAdapter.ReaderCallba
      *
      * @param tag Discovered tag
      */
+    private var message: String = ""
+    private var expectedLength = -1
+
     override fun onTagDiscovered(tag: Tag?) {
         Log.i(TAG, "New tag discovered")
         // Android's Host-based Card Emulation (HCE) feature implements the ISO-DEP (ISO 14443-4)
@@ -38,15 +41,32 @@ class NfcControlReader(private val callback: Callback) : NfcAdapter.ReaderCallba
                 val selCommand = NFCControlAPI.buildSelectApdu()
                 // Send command to remote device
                 Log.i(TAG, "Sending: " + byteArrayToHexString(selCommand))
-                val result = isoDep.transceive(selCommand)
-                val statusWord = byteArrayOf(result[result.size - 2], result[result.size - 1])
-                val payload: ByteArray = Arrays.copyOf(result, result.size - 2)
-                if (hexStringToByteArray(NFCControlAPI.STATUS_SUCCESS).contentEquals(statusWord)) {
-                    val resultData = String(payload, Charset.defaultCharset())
-                    callback.onNewData(resultData)
-                    Log.i(TAG, "Received: $resultData")
-                } else {
-                    Log.w(TAG, "Failed to select AID: ${byteArrayToHexString(result)}")
+                var result = isoDep.transceive(selCommand)
+                var statusWord = byteArrayOf(result[result.size - 2], result[result.size - 1])
+                var payload: ByteArray = Arrays.copyOf(result, result.size - 2)
+                while (!statusWord.contentEquals(hexStringToByteArray(NFCControlAPI.STATUS_END))) {
+                    when {
+                        hexStringToByteArray(NFCControlAPI.STATUS_BEGIN).contentEquals(statusWord) -> {
+                            val resultData = String(payload, Charset.defaultCharset()).toInt()
+                            expectedLength = resultData
+                            message = ""
+                            Log.i(TAG, "New request on $resultData bytes")
+                        }
+                        hexStringToByteArray(NFCControlAPI.STATUS_SUCCESS).contentEquals(statusWord) -> {
+                            val resultData = String(payload, Charset.defaultCharset())
+                            message += resultData
+                            if (message.length == expectedLength) {
+                                callback.onNewData(resultData)
+                            }
+                            Log.i(TAG, "Received: $resultData")
+                        }
+                        else -> {
+                            Log.w(TAG, "Failed to select AID: ${byteArrayToHexString(result)}")
+                        }
+                    }
+                    result = isoDep.transceive(selCommand)
+                    statusWord = byteArrayOf(result[result.size - 2], result[result.size - 1])
+                    payload = Arrays.copyOf(result, result.size - 2)
                 }
             } catch (e: IOException) {
                 Log.e(TAG, "Error communicating with card: $e")

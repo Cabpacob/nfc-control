@@ -6,12 +6,17 @@ import android.os.Bundle
 abstract class BaseNfcControlAdpuService : HostApduService() {
     private var message: String? = null
     private var position = 0
+    private var sentHeader = false
+    private var isReady = false
 
     companion object {
         private const val messageLength = 200
     }
 
     fun setMessage(message: String?) {
+        position = 0
+        sentHeader = false
+        isReady = false
         this.message = message
     }
 
@@ -19,6 +24,10 @@ abstract class BaseNfcControlAdpuService : HostApduService() {
         commandApdu: ByteArray?,
         extras: Bundle?
     ): ByteArray {
+        if (isReady) {
+            return hexStringToByteArray(NFCControlAPI.STATUS_END)
+        }
+
         if (commandApdu == null) {
             return hexStringToByteArray(NFCControlAPI.STATUS_FAILED)
         }
@@ -37,13 +46,28 @@ abstract class BaseNfcControlAdpuService : HostApduService() {
         }
 
         val charset = Charsets.UTF_8
-        val textBytes = message?.substring(position, position + messageLength)?.toByteArray(charset)
-            ?: ByteArray(0)
-
-        position += messageLength
+        val textBytes = if (sentHeader) {
+            position += messageLength
+            message?.substring(
+                position - messageLength,
+                kotlin.math.min(position, message!!.length)
+            )?.toByteArray(charset)
+                ?: ByteArray(0)
+        } else {
+            (message ?: "").length.toString().toByteArray(charset)
+        }
 
         return if (hexCommandApdu.substring(10, 24) == NFCControlAPI.AID) {
-            textBytes + hexStringToByteArray(NFCControlAPI.STATUS_SUCCESS)
+            textBytes + (if (sentHeader) {
+
+                if (message != null && position >= message!!.length) {
+                    isReady = true
+                }
+                hexStringToByteArray(NFCControlAPI.STATUS_SUCCESS)
+            } else {
+                sentHeader = true
+                hexStringToByteArray(NFCControlAPI.STATUS_BEGIN)
+            })
         } else {
             hexStringToByteArray(NFCControlAPI.STATUS_FAILED)
         }
