@@ -2,22 +2,25 @@ package com.example.nfc_lib
 
 import android.nfc.cardemulation.HostApduService
 import android.os.Bundle
+import kotlin.concurrent.withLock
 
 abstract class BaseNfcControlAdpuService : HostApduService() {
     private var message: String? = null
     private var position = 0
     private var sentHeader = false
     private var isReady = false
+    private var state: ServiceState? = null
 
     companion object {
         private const val messageLength = 200
     }
 
-    fun setMessage(message: String?) {
+    fun setNewState(message: String?, state: ServiceState) {
         position = 0
         sentHeader = false
         isReady = false
         this.message = message
+        this.state = state
     }
 
     override fun processCommandApdu(
@@ -62,6 +65,10 @@ abstract class BaseNfcControlAdpuService : HostApduService() {
 
                 if (message != null && position >= message!!.length) {
                     isReady = true
+                    state!!.isFinished = true
+                    state!!.lock.withLock {
+                        state!!.finishedCondition.signal()
+                    }
                 }
                 hexStringToByteArray(NFCControlAPI.STATUS_SUCCESS)
             } else {

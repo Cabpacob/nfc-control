@@ -7,6 +7,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.nfc_lib.ServiceState
+import java.util.concurrent.Executors
+import java.util.concurrent.ThreadPoolExecutor
+import kotlin.concurrent.withLock
 
 
 class MainActivity : AppCompatActivity() {
@@ -19,8 +23,20 @@ class MainActivity : AppCompatActivity() {
             messageTextView.text = "Hold your phone to smart device"
 
             val intentToService = Intent(this, NfcControlAdpuService::class.java)
+            val serviceState = ServiceState()
             intentToService.putExtra(NfcControlAdpuService.KEY_NAME, message)
+            intentToService.putExtra(NfcControlAdpuService.HANDLER_KEY, serviceState)
             startService(intentToService)
+
+            val finishedWaiter = Executors.newSingleThreadExecutor();
+            finishedWaiter.submit {
+                serviceState.lock.withLock {
+                    while (!serviceState.isFinished) {
+                        serviceState.finishedCondition.await()
+                    }
+                }
+                updateAnimation(null, true) //TODO refactor
+            }
         }
     }
 
@@ -33,12 +49,18 @@ class MainActivity : AppCompatActivity() {
         animDrawable.start()
     }
 
-    private fun updateAnimation(message: String?) {
+    private fun updateAnimation(message: String?, isFinished: Boolean = false) {
         val application = application as StateApplication
-        if (message == null) {
-            application.state = State.NO_DATA
-        } else {
-            application.state = State.PROGRESS
+        when {
+            isFinished -> {
+                application.state = State.FINISHED
+            }
+            message == null -> {
+                application.state = State.NO_DATA
+            }
+            else -> {
+                application.state = State.PROGRESS
+            }
         }
 
         findViewById<View>(R.id.root_layout).setBackgroundResource(application.state.animation)
