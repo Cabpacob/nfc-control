@@ -17,7 +17,7 @@ class NfcControlAdpuService : BaseNfcControlAdpuService() {
         if (intent != null) {
             setNewState(
                 intent.getStringExtra(KEY_NAME),
-                intent.getSerializableExtra(HANDLER_KEY) as ServiceState
+                intent.getSerializableExtra(HANDLER_KEY) as Class<*>
             )
         }
 

@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
             val intentToService = Intent(this, NfcControlAdpuService::class.java)
             val serviceState = ServiceState()
             intentToService.putExtra(NfcControlAdpuService.KEY_NAME, message)
-            intentToService.putExtra(NfcControlAdpuService.HANDLER_KEY, serviceState)
+            intentToService.putExtra(NfcControlAdpuService.HANDLER_KEY, MainActivity::class.java)
             startService(intentToService)
 
             val finishedWaiter = Executors.newSingleThreadExecutor();
