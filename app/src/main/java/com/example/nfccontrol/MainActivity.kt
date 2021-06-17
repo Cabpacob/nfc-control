@@ -2,6 +2,7 @@ package com.example.nfccontrol
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.view.View
@@ -18,16 +19,12 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun submitMessage(message: String?) {
         if (message == null) {
-            messageTextView.text = "Please find a QR code"
         } else {
-            messageTextView.text = "Hold your phone to smart device"
 
             val intentToService = Intent(this, NfcControlAdpuService::class.java)
-            val serviceState = ServiceState()
             intentToService.putExtra(NfcControlAdpuService.KEY_NAME, message)
             intentToService.putExtra(NfcControlAdpuService.HANDLER_KEY, MainActivity::class.java)
             startService(intentToService)
-            updateAnimation(null, true) //TODO refactor
         }
     }
 
@@ -35,8 +32,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun startCurrentAnimation() {
         val animDrawable = findViewById<View>(R.id.root_layout).background as AnimationDrawable
-        animDrawable.setEnterFadeDuration(10)
-        animDrawable.setExitFadeDuration(5000)
+
+//        animDrawable.setEnterFadeDuration(10)
+//        animDrawable.setExitFadeDuration(5000)
+
         animDrawable.start()
     }
 
@@ -55,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.root_layout).setBackgroundResource(application.state.animation)
+        messageTextView.text = application.state.messageToUser
         startCurrentAnimation()
     }
 
@@ -84,14 +84,18 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        if (intent?.data?.getQueryParameter("state") != null) {
+        val status = intent?.extras?.get("status")
+
+        if (status == "finished") {
             updateAnimation(null, true)
         }
+        else
+        {
+            val message = getMessage(intent)
 
-        val message = getMessage(intent)
-
-        updateAnimation(message)
-        submitMessage(message)
+            updateAnimation(message)
+            submitMessage(message)
+        }
     }
 
     override fun onResume() {
@@ -99,8 +103,12 @@ class MainActivity : AppCompatActivity() {
 
         val message = getMessage()
 
-        updateAnimation(message)
-        submitMessage(message)
+        val application = application as StateApplication
+        if(application.state != State.FINISHED)
+        {
+            updateAnimation(message)
+            submitMessage(message)
+        }
     }
 }
 

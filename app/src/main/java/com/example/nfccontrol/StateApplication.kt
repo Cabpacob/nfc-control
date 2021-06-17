@@ -4,5 +4,5 @@ import android.app.Application
 
 class StateApplication : Application() {
     var message: String? = null
-    var state: State = State.PROGRESS
+    @Volatile var state: State = State.PROGRESS
 }
