@@ -27,16 +27,7 @@ class MainActivity : AppCompatActivity() {
             intentToService.putExtra(NfcControlAdpuService.KEY_NAME, message)
             intentToService.putExtra(NfcControlAdpuService.HANDLER_KEY, MainActivity::class.java)
             startService(intentToService)
-
-            val finishedWaiter = Executors.newSingleThreadExecutor();
-            finishedWaiter.submit {
-                serviceState.lock.withLock {
-                    while (!serviceState.isFinished) {
-                        serviceState.finishedCondition.await()
-                    }
-                }
-                updateAnimation(null, true) //TODO refactor
-            }
+            updateAnimation(null, true) //TODO refactor
         }
     }
 
@@ -92,6 +83,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+
+        if (intent?.data?.getQueryParameter("state") != null) {
+            updateAnimation(null, true)
+        }
 
         val message = getMessage(intent)
 
