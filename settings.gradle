@@ -2,3 +2,4 @@ include ':app'
 rootProject.name = "nfc control"
 include ':smart-device-example'
 include ':nfc-lib'
+include ':smart-photo-frame-example'
