@@ -28,7 +28,7 @@ object NFCControlAPI {
      * @param aid Application ID (AID) to select
      * @return APDU for SELECT AID command
      */
-    fun buildSelectApdu(): ByteArray {
+    fun buildSelectApduSuccess(): ByteArray {
         // Format: [CLASS | INSTRUCTION | PARAMETER 1 | PARAMETER 2 | LENGTH | DATA]
         return hexStringToByteArray(
             SELECT_ADPU_HEADER + String.format("%02X", AID.length / 2) + AID

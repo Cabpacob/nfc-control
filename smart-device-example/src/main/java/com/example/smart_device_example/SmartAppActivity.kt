@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.nfc_lib.NfcControlReader
 import org.json.JSONException
 import org.json.JSONObject
+import java.nio.charset.Charset
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -24,8 +25,8 @@ class SmartAppActivity : AppCompatActivity() {
             it.setBackgroundColor(randColor())
         }
         reader = NfcControlReader(object : NfcControlReader.Callback {
-            override fun onNewData(data: String) {
-                acceptMessage(data)
+            override fun onNewData(data: ByteArray) {
+                acceptMessage(String(data, Charset.defaultCharset()))
             }
         })
     }
