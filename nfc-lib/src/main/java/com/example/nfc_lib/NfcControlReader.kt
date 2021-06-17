@@ -27,7 +27,7 @@ class NfcControlReader(private val callback: Callback) : NfcAdapter.ReaderCallba
         // In order to communicate with a device using HCE, the discovered tag should be processed
         // using the IsoDep class.
         val isoDep = IsoDep.get(tag)
-        if (isoDep != null) {
+        isoDep?.use {
             try {
                 // Connect to the remote NFC device
                 isoDep.connect()
@@ -46,13 +46,17 @@ class NfcControlReader(private val callback: Callback) : NfcAdapter.ReaderCallba
                 var payload: ByteArray = Arrays.copyOf(result, result.size - 2)
                 while (!statusWord.contentEquals(hexStringToByteArray(NFCControlAPI.STATUS_END))) {
                     when {
-                        hexStringToByteArray(NFCControlAPI.STATUS_BEGIN).contentEquals(statusWord) -> {
+                        hexStringToByteArray(NFCControlAPI.STATUS_BEGIN).contentEquals(
+                            statusWord
+                        ) -> {
                             val resultData = String(payload, Charset.defaultCharset()).toInt()
                             expectedLength = resultData
                             message = ""
                             Log.i(TAG, "New request on $resultData bytes")
                         }
-                        hexStringToByteArray(NFCControlAPI.STATUS_SUCCESS).contentEquals(statusWord) -> {
+                        hexStringToByteArray(NFCControlAPI.STATUS_SUCCESS).contentEquals(
+                            statusWord
+                        ) -> {
                             val resultData = String(payload, Charset.defaultCharset())
                             message += resultData
                             if (message.length == expectedLength) {

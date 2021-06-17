@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import com.example.nfc_lib.BaseNfcControlAdpuService
+import com.example.nfc_lib.ServiceState
 
 class NfcControlAdpuService : BaseNfcControlAdpuService() {
     override fun onDeactivated(reason: Int) {
@@ -14,7 +15,10 @@ class NfcControlAdpuService : BaseNfcControlAdpuService() {
         Log.d(TAG, "Started")
 
         if (intent != null) {
-            setMessage(intent.getStringExtra(KEY_NAME))
+            setNewState(
+                intent.getStringExtra(KEY_NAME),
+                intent.getSerializableExtra(HANDLER_KEY) as Class<*>
+            )
         }
 
         return START_STICKY
@@ -34,5 +38,6 @@ class NfcControlAdpuService : BaseNfcControlAdpuService() {
     companion object {
         private const val TAG = "NfcControlAdpuService"
         const val KEY_NAME = "message"
+        const val HANDLER_KEY = "handler"
     }
 }

@@ -2,11 +2,16 @@ package com.example.nfccontrol
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.nfc_lib.ServiceState
+import java.util.concurrent.Executors
+import java.util.concurrent.ThreadPoolExecutor
+import kotlin.concurrent.withLock
 
 
 class MainActivity : AppCompatActivity() {
@@ -14,12 +19,11 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun submitMessage(message: String?) {
         if (message == null) {
-            messageTextView.text = "Please find a QR code"
         } else {
-            messageTextView.text = "Hold your phone to smart device"
 
             val intentToService = Intent(this, NfcControlAdpuService::class.java)
             intentToService.putExtra(NfcControlAdpuService.KEY_NAME, message)
+            intentToService.putExtra(NfcControlAdpuService.HANDLER_KEY, MainActivity::class.java)
             startService(intentToService)
         }
     }
@@ -28,20 +32,29 @@ class MainActivity : AppCompatActivity() {
 
     private fun startCurrentAnimation() {
         val animDrawable = findViewById<View>(R.id.root_layout).background as AnimationDrawable
-        animDrawable.setEnterFadeDuration(10)
-        animDrawable.setExitFadeDuration(5000)
+
+//        animDrawable.setEnterFadeDuration(10)
+//        animDrawable.setExitFadeDuration(5000)
+
         animDrawable.start()
     }
 
-    private fun updateAnimation(message: String?) {
+    private fun updateAnimation(message: String?, isFinished: Boolean = false) {
         val application = application as StateApplication
-        if (message == null) {
-            application.state = State.NO_DATA
-        } else {
-            application.state = State.PROGRESS
+        when {
+            isFinished -> {
+                application.state = State.FINISHED
+            }
+            message == null -> {
+                application.state = State.NO_DATA
+            }
+            else -> {
+                application.state = State.PROGRESS
+            }
         }
 
         findViewById<View>(R.id.root_layout).setBackgroundResource(application.state.animation)
+        messageTextView.text = application.state.messageToUser
         startCurrentAnimation()
     }
 
@@ -71,10 +84,18 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        val message = getMessage(intent)
+        val status = intent?.extras?.get("status")
 
-        updateAnimation(message)
-        submitMessage(message)
+        if (status == "finished") {
+            updateAnimation(null, true)
+        }
+        else
+        {
+            val message = getMessage(intent)
+
+            updateAnimation(message)
+            submitMessage(message)
+        }
     }
 
     override fun onResume() {
@@ -82,8 +103,12 @@ class MainActivity : AppCompatActivity() {
 
         val message = getMessage()
 
-        updateAnimation(message)
-        submitMessage(message)
+        val application = application as StateApplication
+        if(application.state != State.FINISHED)
+        {
+            updateAnimation(message)
+            submitMessage(message)
+        }
     }
 }
 
