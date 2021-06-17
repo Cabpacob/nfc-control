@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.nfc_lib.ServiceState
+import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 import kotlin.concurrent.withLock
@@ -17,12 +18,16 @@ import kotlin.concurrent.withLock
 class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
-    private fun submitMessage(message: String?) {
-        if (message == null) {
-        } else {
-
+    private fun submitMessage(message: String?, isImage: Boolean) {
+        if (message != null) {
             val intentToService = Intent(this, NfcControlAdpuService::class.java)
-            intentToService.putExtra(NfcControlAdpuService.KEY_NAME, message)
+
+            if (!isImage) {
+                intentToService.putExtra(NfcControlAdpuService.KEY_NAME, message)
+            } else {
+                val image = File(message)
+                intentToService.putExtra(NfcControlAdpuService.KEY_NAME, image.readBytes())
+            }
             intentToService.putExtra(NfcControlAdpuService.HANDLER_KEY, MainActivity::class.java)
             startService(intentToService)
         }
@@ -75,10 +80,10 @@ class MainActivity : AppCompatActivity() {
 
         messageTextView = findViewById(R.id.textView)
 
-        val message = getMessage()
-
-        updateAnimation(message)
-        submitMessage(message)
+//        val message = getMessage()
+//
+//        updateAnimation(message)
+//        submitMessage(message)
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -88,13 +93,17 @@ class MainActivity : AppCompatActivity() {
 
         if (status == "finished") {
             updateAnimation(null, true)
-        }
-        else
-        {
-            val message = getMessage(intent)
-
+        } else {
+            val application = application as StateApplication
+            val message: String? = if (intent?.type?.startsWith("image/") == true) {
+                application.isImage = true
+                intent.data.toString()
+            } else {
+                application.isImage = false
+                getMessage(intent)
+            }
             updateAnimation(message)
-            submitMessage(message)
+            submitMessage(message, application.isImage == true)
         }
     }
 
@@ -104,10 +113,9 @@ class MainActivity : AppCompatActivity() {
         val message = getMessage()
 
         val application = application as StateApplication
-        if(application.state != State.FINISHED)
-        {
+        if (application.state != State.FINISHED) {
             updateAnimation(message)
-            submitMessage(message)
+            submitMessage(message, application.isImage == true)
         }
     }
 }
