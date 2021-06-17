@@ -3,10 +3,11 @@ package com.example.nfc_lib
 import android.content.Intent
 import android.nfc.cardemulation.HostApduService
 import android.os.Bundle
+import android.util.Log
 
 
 abstract class BaseNfcControlAdpuService : HostApduService() {
-    private var message: String? = null
+    private var message: List<Byte>? = null
     private var position = 0
     private var sentHeader = false
     private var isReady = false
@@ -14,14 +15,14 @@ abstract class BaseNfcControlAdpuService : HostApduService() {
     private var activityClass: Class<*>? = null
 
     companion object {
-        private const val messageLength = 200
+        private const val messageLength = 20000
     }
 
-    fun setNewState(message: String?, clazz: Class<*>) {
+    fun setNewState(message: ByteArray?, clazz: Class<*>) {
         position = 0
         sentHeader = false
         isReady = false
-        this.message = message
+        this.message = message?.toList()
         this.activityClass = clazz
     }
 
@@ -53,19 +54,21 @@ abstract class BaseNfcControlAdpuService : HostApduService() {
         val charset = Charsets.UTF_8
         val textBytes = if (sentHeader) {
             position += messageLength
-            message?.substring(
+            Log.i("AAAA", "Sent from ${position - messageLength} to ${kotlin.math.min(position, message!!.size)}")
+            message?.subList(
                 position - messageLength,
-                kotlin.math.min(position, message!!.length)
-            )?.toByteArray(charset)
+                kotlin.math.min(position, message!!.size)
+            )?.toByteArray()
                 ?: ByteArray(0)
         } else {
-            (message ?: "").length.toString().toByteArray(charset)
+            (message ?: emptyList()).size.toString().toByteArray()
         }
+        Log.i("AAAA", "Length ${textBytes.size}")
 
         return if (hexCommandApdu.substring(10, 24) == NFCControlAPI.AID) {
             textBytes + (if (sentHeader) {
-
-                if (message != null && position >= message!!.length) {
+                print( "SENT ${textBytes.size} bytes")
+                if (message != null && position >= message!!.size) {
                     isReady = true
                     val intentToActivity = Intent(this, activityClass)
                     intentToActivity.putExtra("status", "finished")

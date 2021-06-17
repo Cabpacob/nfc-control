@@ -8,6 +8,7 @@ import androidx.annotation.AnyThread
 import java.io.IOException
 import java.nio.charset.Charset
 import java.util.*
+import kotlin.math.min
 
 class NfcControlReader(private val callback: Callback) : NfcAdapter.ReaderCallback {
     /**
@@ -16,7 +17,7 @@ class NfcControlReader(private val callback: Callback) : NfcAdapter.ReaderCallba
      *
      * @param tag Discovered tag
      */
-    private var message: String = ""
+    private var message: ByteArray = ByteArray(0)
     private var expectedLength = -1
 
     override fun onTagDiscovered(tag: Tag?) {
@@ -31,19 +32,20 @@ class NfcControlReader(private val callback: Callback) : NfcAdapter.ReaderCallba
             try {
                 // Connect to the remote NFC device
                 isoDep.connect()
-                isoDep.timeout = 3600
+                isoDep.timeout = 5000
                 Log.i(TAG, "Timeout = " + isoDep.timeout)
                 Log.i(TAG, "MaxTransceiveLength = " + isoDep.maxTransceiveLength)
 
                 // Build SELECT AID command for our loyalty card service.
                 // This command tells the remote device which service we wish to communicate with.
                 Log.i(TAG, "Requesting remote AID")
-                val selCommand = NFCControlAPI.buildSelectApdu()
+                val selCommandSuccess = NFCControlAPI.buildSelectApduSuccess()
                 // Send command to remote device
-                Log.i(TAG, "Sending: " + byteArrayToHexString(selCommand))
-                var result = isoDep.transceive(selCommand)
+                Log.i(TAG, "Sending: " + byteArrayToHexString(selCommandSuccess))
+                var result = isoDep.transceive(selCommandSuccess)
                 var statusWord = byteArrayOf(result[result.size - 2], result[result.size - 1])
                 var payload: ByteArray = Arrays.copyOf(result, result.size - 2)
+
                 while (!statusWord.contentEquals(hexStringToByteArray(NFCControlAPI.STATUS_END))) {
                     when {
                         hexStringToByteArray(NFCControlAPI.STATUS_BEGIN).contentEquals(
@@ -51,24 +53,28 @@ class NfcControlReader(private val callback: Callback) : NfcAdapter.ReaderCallba
                         ) -> {
                             val resultData = String(payload, Charset.defaultCharset()).toInt()
                             expectedLength = resultData
-                            message = ""
+                            message = ByteArray(0)
                             Log.i(TAG, "New request on $resultData bytes")
                         }
                         hexStringToByteArray(NFCControlAPI.STATUS_SUCCESS).contentEquals(
                             statusWord
                         ) -> {
-                            val resultData = String(payload, Charset.defaultCharset())
+                            val resultData = payload
+
                             message += resultData
-                            if (message.length == expectedLength) {
-                                callback.onNewData(resultData)
+                            if (message.size == expectedLength) {
+                                callback.onNewData(message)
                             }
-                            Log.i(TAG, "Received: $resultData")
+                            Log.i(TAG, "Need ${expectedLength}")
+                            Log.i(TAG, "Have ${message.size}")
+
+                            Log.i(TAG, "Received: ${resultData.size}")
                         }
                         else -> {
                             Log.w(TAG, "Failed to select AID: ${byteArrayToHexString(result)}")
                         }
                     }
-                    result = isoDep.transceive(selCommand)
+                    result = isoDep.transceive(selCommandSuccess)
                     statusWord = byteArrayOf(result[result.size - 2], result[result.size - 1])
                     payload = Arrays.copyOf(result, result.size - 2)
                 }
@@ -80,7 +86,7 @@ class NfcControlReader(private val callback: Callback) : NfcAdapter.ReaderCallba
 
     interface Callback {
         @AnyThread
-        fun onNewData(data: String)
+        fun onNewData(data: ByteArray)
     }
 
     companion object {

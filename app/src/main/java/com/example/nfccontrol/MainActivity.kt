@@ -4,11 +4,14 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.nfc_lib.ServiceState
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
@@ -23,12 +26,14 @@ class MainActivity : AppCompatActivity() {
             val intentToService = Intent(this, NfcControlAdpuService::class.java)
 
             if (!isImage) {
-                intentToService.putExtra(NfcControlAdpuService.KEY_NAME, message)
+                intentToService.putExtra(NfcControlAdpuService.KEY_NAME, message.toByteArray())
             } else {
-                val image = File(message)
-                intentToService.putExtra(NfcControlAdpuService.KEY_NAME, image.readBytes())
+
+                intentToService.putExtra(NfcControlAdpuService.KEY_NAME, message.toByteArray())
             }
+            intentToService.putExtra(NfcControlAdpuService.IMAGE_KEY, isImage)
             intentToService.putExtra(NfcControlAdpuService.HANDLER_KEY, MainActivity::class.java)
+
             startService(intentToService)
         }
     }
@@ -76,6 +81,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        intent //TODO
+
         setContentView(R.layout.activity_main)
 
         messageTextView = findViewById(R.id.textView)
@@ -97,6 +104,7 @@ class MainActivity : AppCompatActivity() {
             val application = application as StateApplication
             val message: String? = if (intent?.type?.startsWith("image/") == true) {
                 application.isImage = true
+                application.message = intent.data.toString()
                 intent.data.toString()
             } else {
                 application.isImage = false

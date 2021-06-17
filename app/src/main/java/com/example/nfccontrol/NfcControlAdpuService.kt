@@ -1,10 +1,13 @@
 package com.example.nfccontrol
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import com.example.nfc_lib.BaseNfcControlAdpuService
 import com.example.nfc_lib.ServiceState
+import java.io.ByteArrayOutputStream
+import java.nio.charset.Charset
 
 class NfcControlAdpuService : BaseNfcControlAdpuService() {
     override fun onDeactivated(reason: Int) {
@@ -15,8 +18,29 @@ class NfcControlAdpuService : BaseNfcControlAdpuService() {
         Log.d(TAG, "Started")
 
         if (intent != null) {
+            val filename =
+                String(intent.getByteArrayExtra(KEY_NAME) ?: ByteArray(0), Charset.defaultCharset())
+
+            val isImage = intent.getBooleanExtra(IMAGE_KEY, false)
+            val message: ByteArray
+
+            if (isImage) {
+                val uri = Uri.parse(filename)
+//                val image = File(, uri.toString())
+
+                val baos = ByteArrayOutputStream()
+                contentResolver.openInputStream(uri).use {
+                    it?.copyTo(baos)
+                }
+
+                message = baos.toByteArray()
+
+            } else {
+                message = intent.getByteArrayExtra(KEY_NAME) ?: ByteArray(0)
+            }
+
             setNewState(
-                intent.getStringExtra(KEY_NAME),
+                message,
                 intent.getSerializableExtra(HANDLER_KEY) as Class<*>
             )
         }
@@ -37,6 +61,7 @@ class NfcControlAdpuService : BaseNfcControlAdpuService() {
 
     companion object {
         private const val TAG = "NfcControlAdpuService"
+        const val IMAGE_KEY = "image"
         const val KEY_NAME = "message"
         const val HANDLER_KEY = "handler"
     }
