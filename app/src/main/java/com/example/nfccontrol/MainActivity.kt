@@ -20,7 +20,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var messageTextView: TextView
 
     private fun startCurrentAnimation() {
+        findViewById<View>(R.id.root_layout).setBackgroundResource(stateApplication.state.animation)
+        messageTextView.text = stateApplication.state.messageToUser
+
         val animDrawable = findViewById<View>(R.id.root_layout).background as AnimationDrawable
+
         animDrawable.start()
     }
 
@@ -53,8 +57,6 @@ class MainActivity : AppCompatActivity() {
         Log.i(TAG, "OnResume")
 
         stateApplication = application as StateApplication
-
-        onNewIntent(intent)
     }
 }
 

@@ -19,7 +19,7 @@ class StateApplication : Application() {
             Log.i(TAG, "Send message $message")
             val intentToService = Intent(this, NfcControlAdpuService::class.java)
 
-            intentToService.putExtra(NfcControlAdpuService.KEY_NAME, message)
+            intentToService.putExtra(NfcControlAdpuService.KEY_NAME, message?.toByteArray())
             intentToService.putExtra(NfcControlAdpuService.IS_FILE, isFile)
             intentToService.putExtra(NfcControlAdpuService.ACTIVITY_CLASS, MainActivity::class.java)
 
@@ -45,7 +45,13 @@ class StateApplication : Application() {
                 message = getMessage(intent)
             }
 
-            stateListener.run()
+            state = if (message == null) {
+                State.NO_DATA
+            } else {
+                State.PROGRESS
+            }
+
         }
+        stateListener.run()
     }
 }

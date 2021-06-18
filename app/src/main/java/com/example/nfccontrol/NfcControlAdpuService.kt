@@ -24,20 +24,23 @@ class NfcControlAdpuService : BaseNfcControlAdpuService() {
         Log.d(TAG, "Started")
 
         if (intent != null) {
-            val filename = intent.getStringExtra(KEY_NAME)
-            val isImage = intent.getBooleanExtra(IS_FILE, false)
-            val message: ByteArray = if (isImage) {
+            val isFile = intent.getBooleanExtra(IS_FILE, false)
+            val message: ByteArray = if (isFile) {
+                val bytes = intent.getByteArrayExtra(KEY_NAME) ?: ByteArray(0)
+
+                val filename = String(bytes, Charset.defaultCharset())
                 val uri = Uri.parse(filename)
 
-                val baos = ByteArrayOutputStream()
+                val buffer = ByteArrayOutputStream()
                 contentResolver.openInputStream(uri).use {
-                    it?.copyTo(baos)
+                    it?.copyTo(buffer)
                 }
 
-                baos.toByteArray()
+                buffer.toByteArray()
             } else {
                 intent.getByteArrayExtra(KEY_NAME) ?: ByteArray(0)
             }
+
             val activityClass = intent.getSerializableExtra(ACTIVITY_CLASS) as Class<*>
 
             setNewState(message, activityClass)
