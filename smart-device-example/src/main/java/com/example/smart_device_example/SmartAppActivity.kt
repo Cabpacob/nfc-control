@@ -10,12 +10,11 @@ import com.example.nfc_lib.NfcControlReader
 import org.json.JSONException
 import org.json.JSONObject
 import java.nio.charset.Charset
-import kotlin.math.abs
 import kotlin.random.Random
 
 class SmartAppActivity : AppCompatActivity() {
-    lateinit var container: View
-    lateinit var reader: NfcControlReader
+    private lateinit var container: View
+    private lateinit var reader: NfcControlReader
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,9 +42,9 @@ class SmartAppActivity : AppCompatActivity() {
 
     @ColorInt
     private fun randColor(): Int {
-        val red = abs(Random.nextInt() % 255)
-        val green = abs(Random.nextInt() % 255)
-        val blue = abs(Random.nextInt() % 255)
+        val red = Random.nextInt(0, 256)
+        val green = Random.nextInt(0, 256)
+        val blue = Random.nextInt(0, 256)
         return Color.rgb(red, green, blue)
     }
 
