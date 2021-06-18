@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.util.Log
 import com.example.nfc_lib.BaseNfcControlAdpuService
 import java.io.ByteArrayOutputStream
-import java.nio.charset.Charset
 
 class NfcControlAdpuService : BaseNfcControlAdpuService() {
     companion object {
@@ -29,12 +28,12 @@ class NfcControlAdpuService : BaseNfcControlAdpuService() {
             val message: ByteArray = if (isImage) {
                 val uri = Uri.parse(filename)
 
-                val baos = ByteArrayOutputStream()
+                val buffer = ByteArrayOutputStream()
                 contentResolver.openInputStream(uri).use {
-                    it?.copyTo(baos)
+                    it?.copyTo(buffer)
                 }
 
-                baos.toByteArray()
+                buffer.toByteArray()
             } else {
                 intent.getByteArrayExtra(KEY_NAME) ?: ByteArray(0)
             }

@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import java.util.function.BiConsumer
 
 
 class MainActivity : AppCompatActivity() {
@@ -20,6 +19,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var messageTextView: TextView
 
     private fun startCurrentAnimation() {
+        findViewById<View>(R.id.root_layout).setBackgroundResource(stateApplication.state.animation)
+
         val animDrawable = findViewById<View>(R.id.root_layout).background as AnimationDrawable
         animDrawable.start()
     }

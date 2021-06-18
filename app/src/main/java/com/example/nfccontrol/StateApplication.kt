@@ -45,6 +45,10 @@ class StateApplication : Application() {
                 message = getMessage(intent)
             }
 
+            if (message == null) {
+                state = State.NO_DATA
+            }
+
             stateListener.run()
         }
     }
