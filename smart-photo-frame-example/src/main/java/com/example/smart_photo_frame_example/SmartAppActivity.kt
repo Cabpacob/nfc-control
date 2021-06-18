@@ -6,8 +6,10 @@ import android.net.Uri
 import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.drawToBitmap
 import com.example.nfc_lib.NfcControlReader
 import com.example.smart_photo_frame_example.R
 import org.json.JSONException
@@ -22,14 +24,17 @@ import kotlin.random.Random
 
 class SmartAppActivity : AppCompatActivity() {
     lateinit var container: View
+    lateinit var image: ImageView
     lateinit var reader: NfcControlReader
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_smart_app)
         container = findViewById(R.id.smart_app_container)
+        image = findViewById(R.id.image)
         container.setOnClickListener {
             it.setBackgroundColor(randColor())
+            image.setImageDrawable(null)
         }
         reader = NfcControlReader(object : NfcControlReader.Callback {
             override fun onNewData(data: ByteArray) {
@@ -84,7 +89,7 @@ class SmartAppActivity : AppCompatActivity() {
 //                out.println(message.toByteArray())
 //            }
             runOnUiThread {
-                container.background = Drawable.createFromPath(file.absolutePath)
+                image.setImageDrawable(Drawable.createFromPath(file.absolutePath))
             }
         } catch (e: JSONException) {
             // Do nothing
