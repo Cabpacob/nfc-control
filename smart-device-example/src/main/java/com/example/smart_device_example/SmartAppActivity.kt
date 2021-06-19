@@ -14,8 +14,8 @@ import kotlin.math.abs
 import kotlin.random.Random
 
 class SmartAppActivity : AppCompatActivity() {
-    lateinit var container: View
-    lateinit var reader: NfcControlReader
+    private lateinit var container: View
+    private lateinit var reader: NfcControlReader
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +52,7 @@ class SmartAppActivity : AppCompatActivity() {
     private fun acceptMessage(message: String) {
         try {
             val color = JSONObject(message).getString("color")
-            container.setBackgroundColor(Color.parseColor(color))
+            runOnUiThread { container.setBackgroundColor(Color.parseColor(color)) }
         } catch (e: JSONException) {
             // Do nothing
         }

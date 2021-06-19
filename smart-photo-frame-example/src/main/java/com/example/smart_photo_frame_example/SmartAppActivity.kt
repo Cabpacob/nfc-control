@@ -6,30 +6,28 @@ import android.net.Uri
 import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import com.example.nfc_lib.NfcControlReader
-import com.example.smart_photo_frame_example.R
 import org.json.JSONException
-import org.json.JSONObject
-import java.io.BufferedInputStream
 import java.io.File
-import java.io.OutputStream
-import java.io.Writer
-import java.nio.charset.Charset
 import kotlin.math.abs
 import kotlin.random.Random
 
 class SmartAppActivity : AppCompatActivity() {
-    lateinit var container: View
-    lateinit var reader: NfcControlReader
+    private lateinit var container: View
+    private lateinit var image: ImageView
+    private lateinit var reader: NfcControlReader
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_smart_app)
         container = findViewById(R.id.smart_app_container)
+        image = findViewById(R.id.image)
         container.setOnClickListener {
             it.setBackgroundColor(randColor())
+            image.setImageDrawable(null)
         }
         reader = NfcControlReader(object : NfcControlReader.Callback {
             override fun onNewData(data: ByteArray) {
@@ -58,33 +56,22 @@ class SmartAppActivity : AppCompatActivity() {
 
     private fun acceptMessage(message: ByteArray) {
         try {
-//            val color = JSONObject(message).getString("color")
-//            container.setBackgroundColor(Color.parseColor(color))
             val filename = "image"
             val file = File(application.obbDir, filename)
-            file.parentFile.mkdirs()
-            val flag1 = file.exists()
-            val flag2 = file.canRead()
-            val flag3 = file.canWrite()
+            file.parentFile!!.mkdirs()
 
             if (!file.exists()) {
-                val flag4 = file.createNewFile()
+                file.createNewFile()
             }
 
-            val flag5 = file.exists()
-            val flag6 = file.canRead()
-            val flag7 = file.canWrite()
             val uri = Uri.fromFile(file)
 
             contentResolver.openOutputStream(uri).use {
                 it?.write(message)
             }
 
-//            file.printWriter().use { out ->
-//                out.println(message.toByteArray())
-//            }
             runOnUiThread {
-                container.background = Drawable.createFromPath(file.absolutePath)
+                image.setImageDrawable(Drawable.createFromPath(file.absolutePath))
             }
         } catch (e: JSONException) {
             // Do nothing
