@@ -52,7 +52,7 @@ class SmartAppActivity : AppCompatActivity() {
     private fun acceptMessage(message: String) {
         try {
             val color = JSONObject(message).getString("color")
-            container.setBackgroundColor(Color.parseColor(color))
+            runOnUiThread { container.setBackgroundColor(Color.parseColor(color)) }
         } catch (e: JSONException) {
             // Do nothing
         }
